@@ -12,7 +12,7 @@ class m191203_124253_create_fk_activities_users extends Migration
      */
     public function safeUp()
     {
-
+        $this->addForeignKey('fk_activities_users','{{%activities}}', 'id_author', '{{%users}}', 'id');
     }
 
     /**
@@ -20,23 +20,7 @@ class m191203_124253_create_fk_activities_users extends Migration
      */
     public function safeDown()
     {
-        echo "m191203_124253_create_fk_activities_users cannot be reverted.\n";
-
-        return false;
+        $this->dropForeignKey('fk_activities_users','{{%activities}}');
+        return true;
     }
-
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m191203_124253_create_fk_activities_users cannot be reverted.\n";
-
-        return false;
-    }
-    */
 }

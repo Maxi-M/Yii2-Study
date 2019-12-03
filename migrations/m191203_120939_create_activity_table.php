@@ -32,4 +32,5 @@ class m191203_120939_create_activity_table extends Migration
     {
         $this->dropTable('{{%activities}}');
     }
+
 }
