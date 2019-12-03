@@ -12,6 +12,14 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
+        'dummy' => [
+            'class' => 'app\components\DummyDataComponent',
+        ],
+        'formatter' => [
+            'dateFormat'     => 'php:d-m-Y',
+            'datetimeFormat' => 'php:d-m-Y H:i:s',
+            'timeFormat'     => 'php:H:i:s',
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'GtZV64lf69-Ag1CB2Bvo-CDmzEwGsdEE',

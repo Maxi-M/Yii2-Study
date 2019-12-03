@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Activity;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -124,5 +125,15 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+
+    /**
+     * Показвает страницу с календарём.
+     * @return string
+     */
+    public function actionCalendar()
+    {
+        $activities = Yii::$app->dummy->activities;
+        return $this->render('calendar', ['activities' => $activities]);
     }
 }
