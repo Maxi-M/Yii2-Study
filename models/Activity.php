@@ -3,66 +3,36 @@
 
 namespace app\models;
 
-
-use yii\base\Model;
+use DateTime;
+use yii\db\ActiveRecord;
 
 /**
  * Class Activity
  * Отражает сущность события
  * @package app\models
- *
- * @property string|false $startTime
+ * @property int $start_timestamp [timestamp]
+ * @property int $end_timestamp [timestamp]
+ * @property int $id_author [int(11)]
+ * @property bool $is_recurrent [tinyint(1)]
+ * @property bool $is_all_day [tinyint(1)]
+ * @property int $id [int(11)]
+ * @property string $title [varchar(255)]
  * @property string|false $endTime
+ * @property string|false $startTime
+ * @property string|false $endDay
+ * @property string|false $startDay
+ * @property string $body [text]
  */
-class Activity extends Model
+class Activity extends ActiveRecord
 {
     /**
-     * id сабытия
-     * @var int
+     * Возвращает название таблицы, так как оно не соответствует названию класса
+     * @return string
      */
-    public $id;
-
-    /**
-     * Название (заголовок) события
-     * @var string
-     */
-    public $title;
-
-    /**
-     * Unix timestamp дня начала события
-     * @var int
-     */
-    public $startDay;
-
-    /**
-     * Unix timestamp дня окончания события
-     * @var int
-     */
-    public $endDay;
-
-    /**
-     * ID автора, пользователя, создавшего событие
-     * @var int
-     */
-    public $idAuthor;
-
-    /**
-     * Описание события
-     * @var string
-     */
-    public $body;
-
-    /**
-     * Признак повторяющегося события
-     * @var bool
-     */
-    public $isRecurrent;
-
-    /**
-     * Признак того, что событие занимает весь день.
-     * @var bool
-     */
-    public $isAllDay;
+    public static function tableName()
+    {
+        return 'activities';
+    }
 
     /**
      * Массив удобочитаемых названий атрибутов
@@ -72,22 +42,13 @@ class Activity extends Model
     {
         return [
             'title' => 'Название события',
-            'startDay' => 'Дата начала',
-            'endDay' => 'Дата завершения',
-            'idAuthor' => 'ID автора',
+            'start_timestamp' => 'Время начала события',
+            'end_timestamp' => 'Время завершения события',
+            'id_author' => 'ID автора',
             'body' => 'Описание события',
-            'isRecurrent' => 'Повторяющееся событие',
-            'isAllDay' => 'Событие на весь день'
+            'is_recurrent' => 'Повторяющееся событие',
+            'is_all_day' => 'Событие на весь день'
         ];
-    }
-
-    /**
-     * Activity constructor.
-     * @param array $config
-     */
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
     }
 
     /**
@@ -105,7 +66,7 @@ class Activity extends Model
      */
     protected function getTime($timestamp)
     {
-        return date ("H:i", $timestamp);
+        return date("H:i", $timestamp);
     }
 
     /**
@@ -114,7 +75,7 @@ class Activity extends Model
      */
     public function getStartDay()
     {
-        return $this->getDay($this->startDay);
+        return $this->getDay($this->start_timestamp);
     }
 
     /**
@@ -123,7 +84,7 @@ class Activity extends Model
      */
     public function getEndDay()
     {
-        return $this->getDay($this->endDay);
+        return $this->getDay($this->end_timestamp);
     }
 
     /**
@@ -132,7 +93,7 @@ class Activity extends Model
      */
     public function getStartTime()
     {
-        return $this->getTime($this->startDay);
+        return $this->getTime($this->start_timestamp);
     }
 
     /**
@@ -141,7 +102,7 @@ class Activity extends Model
      */
     public function getEndTime()
     {
-        return $this->getTime($this->endDay);
+        return $this->getTime($this->end_timestamp);
     }
 
     /**
@@ -151,15 +112,15 @@ class Activity extends Model
     public function rules()
     {
         return [
-            [['title', 'startDay'], 'required'],
+            [['title', 'start_timestamp'], 'required'],
             [['id'], 'integer'],
 //            [['startDay'], 'datetime', 'format' => 'php:d.m.Y H:i:s', 'timestampAttribute' => 'startDay'],
 //            [['endDay'], 'datetime', 'format' => 'php:d.m.Y H:i:s', 'timestampAttribute' => 'endDay'],
-            [['startDay', 'endDay'],'filter', 'filter' => function ($value){
-                $dateTime = \DateTime::createFromFormat('php:d.m.Y H:i:s', $value);
+            [['start_timestamp', 'end_timestamp'], 'filter', 'filter' => function ($value) {
+                $dateTime = DateTime::createFromFormat('php:d.m.Y H:i:s', $value);
                 return $dateTime->format('U');
             }],
-            [['body', 'endDay', 'idAuthor', 'isRecurrent', 'isAllDay'], 'safe']
+            [['body', 'end_timestamp', 'id_author', 'is_recurrent', 'is_all_day'], 'safe']
         ];
     }
 }
