@@ -1,5 +1,7 @@
 <?php
 
+use yii\rbac\DbManager;
+
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
@@ -13,10 +15,7 @@ $config = [
     ],
     'components' => [
         'authManager' => [
-            'class' => 'yii\rbac\DbManager'
-        ],
-        'dummy' => [
-            'class' => 'app\components\DummyDataComponent',
+            'class' => DbManager::class
         ],
         'formatter' => [
             'dateFormat'     => 'php:d-m-Y',

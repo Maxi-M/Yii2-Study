@@ -3,25 +3,27 @@
 
 namespace app\models;
 
+use app\components\TimestampTransformBehavior;
 use DateTime;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
 /**
  * Class Activity
  * Отражает сущность события
  * @package app\models
- * @property int $start_timestamp [timestamp]
- * @property int $end_timestamp [timestamp]
+ * @property string $start_timestamp [MySQL timestamp]
+ * @property string $end_timestamp [MySQL timestamp]
  * @property int $id_author [int(11)]
  * @property bool $is_recurrent [tinyint(1)]
  * @property bool $is_all_day [tinyint(1)]
  * @property int $id [int(11)]
  * @property string $title [varchar(255)]
+ * @property string $body [text]
  * @property string|false $endTime
  * @property string|false $startTime
  * @property string|false $endDay
  * @property string|false $startDay
- * @property string $body [text]
  */
 class Activity extends ActiveRecord
 {
@@ -29,7 +31,7 @@ class Activity extends ActiveRecord
      * Возвращает название таблицы, так как оно не соответствует названию класса
      * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'activities';
     }
@@ -38,16 +40,44 @@ class Activity extends ActiveRecord
      * Массив удобочитаемых названий атрибутов
      * @return array
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'title' => 'Название события',
-            'start_timestamp' => 'Время начала события',
-            'end_timestamp' => 'Время завершения события',
+            'start_timestamp' => 'Дата начала события',
+            'end_timestamp' => 'Дата завершения события',
             'id_author' => 'ID автора',
             'body' => 'Описание события',
             'is_recurrent' => 'Повторяющееся событие',
             'is_all_day' => 'Событие на весь день'
+        ];
+    }
+
+    /**
+     * Правила валидации форм
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            [['title'], 'required'],
+            [['start_timestamp'], 'required'],
+            [['start_timestamp'], 'date', 'format' => 'php:d.m.Y', 'timestampAttribute' => 'start_timestamp'],
+            [['end_timestamp'], 'date', 'format' => 'php:d.m.Y', 'timestampAttribute' => 'end_timestamp'],
+            [['id_author'], 'integer'],
+            [['body'], 'string'],
+            [['title'], 'string', 'max' => 255],
+            [['id', 'is_recurrent', 'is_all_day'], 'safe']
+        ];
+    }
+
+    public function behaviors():array
+    {
+        return [
+            'TimestampTransform' => [
+                'class' => TimestampTransformBehavior::className(),
+                'attributes' => ['start_timestamp', 'end_timestamp'],
+            ]
         ];
     }
 
@@ -57,7 +87,7 @@ class Activity extends ActiveRecord
      */
     protected function getDay($timestamp)
     {
-        return date("d.m.Y", $timestamp);
+        return date("d.m.Y", strtotime($timestamp));
     }
 
     /**
@@ -66,7 +96,7 @@ class Activity extends ActiveRecord
      */
     protected function getTime($timestamp)
     {
-        return date("H:i", $timestamp);
+        return date("H:i", strtotime($timestamp));
     }
 
     /**
@@ -105,22 +135,5 @@ class Activity extends ActiveRecord
         return $this->getTime($this->end_timestamp);
     }
 
-    /**
-     * Правила валидации форм
-     * @return array
-     */
-    public function rules()
-    {
-        return [
-            [['title', 'start_timestamp'], 'required'],
-            [['id'], 'integer'],
-//            [['startDay'], 'datetime', 'format' => 'php:d.m.Y H:i:s', 'timestampAttribute' => 'startDay'],
-//            [['endDay'], 'datetime', 'format' => 'php:d.m.Y H:i:s', 'timestampAttribute' => 'endDay'],
-            [['start_timestamp', 'end_timestamp'], 'filter', 'filter' => function ($value) {
-                $dateTime = DateTime::createFromFormat('php:d.m.Y H:i:s', $value);
-                return $dateTime->format('U');
-            }],
-            [['body', 'end_timestamp', 'id_author', 'is_recurrent', 'is_all_day'], 'safe']
-        ];
-    }
+
 }

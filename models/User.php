@@ -23,13 +23,52 @@ use yii\web\IdentityInterface;
  * @property string $phone [varchar(50)]
  * @property string $path_to_photo [varchar(255)]
  * @property string $authKey
- * @property string $password write-only password
  */
 class User extends ActiveRecord implements IdentityInterface
 {
+    public $password;
+    public $password2;
+
     public static function tableName()
     {
         return 'users';
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'username' => 'Логин',
+            'email' => 'E-mail',
+            'name' => 'Имя',
+            'surname' => 'Фамилия',
+            'phone' => 'Телефон',
+            'password' => 'Пароль',
+            'password2' => 'Пароль повторно',
+        ];
+    }
+
+    public function rules()
+    {
+        return [
+            ['id', 'integer'],
+            ['username', 'filter', 'filter' => 'trim'],
+            ['username', 'required'],
+            ['username', 'unique', 'targetClass' => User::class, 'message' => 'This username has already been taken.'],
+            ['username', 'string', 'min' => 2, 'max' => 255],
+
+            ['email', 'filter', 'filter' => 'trim'],
+            ['email', 'required'],
+            ['email', 'email'],
+            ['email', 'string', 'max' => 255],
+            ['email', 'unique', 'targetClass' => User::class, 'message' => 'This email address has already been taken.'],
+
+            [['name'], 'required'],
+            [['name', 'surname'], 'string', 'min' => 2, 'max' => 255],
+
+            [['password','password2'], 'required'],
+            ['password2', 'compare', 'compareAttribute' => 'password', 'message' => "Passwords don't match"],
+            ['phone', 'string'],
+        ];
     }
 
     /**
@@ -45,7 +84,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-       return null;
+        return null;
     }
 
     /**
