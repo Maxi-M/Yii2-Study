@@ -11,7 +11,6 @@ use yii\widgets\ActiveForm;
 <div class="activity-form">
 
     <?php $form = ActiveForm::begin(); ?>
-    <?php $form->action = Url::to('/activity/form') ?>
     <?= $form->field($model, 'id')->hiddenInput()->label(false, ['style' => 'display:none']) ?>
     <?= $form->field($model, 'title') ?>
     <?= $form->field($model, 'start_timestamp')->widget("kartik\date\DatePicker", [
