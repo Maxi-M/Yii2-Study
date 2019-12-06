@@ -64,6 +64,7 @@ class Activity extends ActiveRecord
             [['start_timestamp'], 'required'],
             [['start_timestamp'], 'date', 'format' => 'php:d.m.Y', 'timestampAttribute' => 'start_timestamp'],
             [['end_timestamp'], 'date', 'format' => 'php:d.m.Y', 'timestampAttribute' => 'end_timestamp'],
+            [['end_timestamp'], 'adjustDate'],
             [['id_author'], 'integer'],
             [['body'], 'string'],
             [['title'], 'string', 'max' => 255],
@@ -71,7 +72,26 @@ class Activity extends ActiveRecord
         ];
     }
 
-    public function behaviors():array
+    /**
+     * Функция-валидатор для установки даты окончания события в соответствие со следующими правилами.
+     * - При пустом поле времени завершения события устанавливается значение, равное дате начала события.
+     * - Дата окончания не может быть меньше даты начала.
+     */
+    public function adjustDate($attribute)
+    {
+        if ($this->end_timestamp === null) {
+            $this->end_timestamp = $this->start_timestamp;
+        }
+        if ($this->start_timestamp > $this->end_timestamp) {
+            $this->addError($attribute, 'Дата окончания события не может быть меньше даты начала события.');
+        }
+    }
+
+    /**
+     * Возвращает привязанные к модели поведения.
+     * @return array
+     */
+    public function behaviors(): array
     {
         return [
             'TimestampTransform' => [

@@ -12,7 +12,7 @@ use yii\helpers\Url;
     <h1>Импровизированный календарь</h1>
     <p>Представляет собой заглушку в виде списка событий</p>
 
-<?= Html::a('Создать новое событие', Url::to(['activity/form']), ['class'=>'btn btn-success']) ?>
+<?= Html::a('Создать новое событие', Url::to(['activity/create']), ['class'=>'btn btn-success']) ?>
 <?php foreach ($activities as $activity): ?>
     <?= Html::a($activity->title, Url::to(['activity/show', 'id' => $activity->id]), ['style'=>'display:block']) ?>
 <?php endforeach; ?>

@@ -29,7 +29,7 @@ class TimestampTransformBehavior extends Behavior
      * Объявляет обработчики событий для событий владельца (модели)
      * @return array
      */
-    public function events():array
+    public function events(): array
     {
         return [
             ActiveRecord::EVENT_BEFORE_INSERT => 'transform',
@@ -43,7 +43,9 @@ class TimestampTransformBehavior extends Behavior
     public function transform()
     {
         foreach ($this->attributes as $attribute) {
-            $this->owner->$attribute = date('Y-m-d H:i:s', $this->owner->$attribute);
+            if (is_int($this->owner->$attribute)) {
+                $this->owner->$attribute = date('Y-m-d H:i:s', $this->owner->$attribute);
+            }
         }
     }
 }

@@ -10,9 +10,9 @@ use yii\widgets\ActiveForm;
 ?>
 <div class="user-form">
 
-    <?php $form = ActiveForm::begin(); ?>
-        <?php $form->action = Url::to('/user/submit') ?>
-
+    <?php $form = ActiveForm::begin(
+            ['validationUrl' => '/user/ajax-validate']
+    ); ?>
         <?= $form->field($model, 'id')->hiddenInput()->label(false, ['style' => 'display:none']) ?>
         <?= $form->field($model, 'username', ['enableAjaxValidation' => true]) ?>
         <?= $form->field($model, 'email', ['enableAjaxValidation' => true]) ?>

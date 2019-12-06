@@ -2,7 +2,9 @@
 
 namespace app\models;
 
+use app\components\TimestampTransformBehavior;
 use yii;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
@@ -26,6 +28,8 @@ use yii\web\IdentityInterface;
  */
 class User extends ActiveRecord implements IdentityInterface
 {
+    const SCENARIO_CREATE_USER = 'create_new_user';
+
     public $password;
     public $password2;
 
@@ -53,21 +57,38 @@ class User extends ActiveRecord implements IdentityInterface
             ['id', 'integer'],
             ['username', 'filter', 'filter' => 'trim'],
             ['username', 'required'],
-            ['username', 'unique', 'targetClass' => User::class, 'message' => 'This username has already been taken.'],
+            ['username', 'unique', 'targetClass' => User::class, 'message' => 'This username has already been taken.', 'on' => self::SCENARIO_CREATE_USER],
             ['username', 'string', 'min' => 2, 'max' => 255],
 
             ['email', 'filter', 'filter' => 'trim'],
             ['email', 'required'],
             ['email', 'email'],
             ['email', 'string', 'max' => 255],
-            ['email', 'unique', 'targetClass' => User::class, 'message' => 'This email address has already been taken.'],
+            ['email', 'unique', 'targetClass' => User::class, 'message' => 'This email address has already been taken.', 'on' => self::SCENARIO_CREATE_USER],
 
             [['name'], 'required'],
             [['name', 'surname'], 'string', 'min' => 2, 'max' => 255],
 
-            [['password','password2'], 'required'],
-            ['password2', 'compare', 'compareAttribute' => 'password', 'message' => "Passwords don't match"],
+            [['password', 'password2'], 'required', 'on' => self::SCENARIO_CREATE_USER],
+            ['password2', 'compare', 'compareAttribute' => 'password', 'message' => "Passwords don't match", 'on' => self::SCENARIO_CREATE_USER],
             ['phone', 'string'],
+        ];
+    }
+
+    public function behaviors()
+    {
+        return [
+            'timestamp_behavior' => [
+                'class' => TimestampBehavior::className(),
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+            ],
+            'TimestampTransform' => [
+                'class' => TimestampTransformBehavior::className(),
+                'attributes' => ['created_at', 'updated_at'],
+            ]
         ];
     }
 
