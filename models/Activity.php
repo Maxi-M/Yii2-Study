@@ -12,13 +12,13 @@ use yii\db\ActiveRecord;
  * Class Activity
  * Отражает сущность события
  * @package app\models
+ * @property string $title [varchar(255)]
  * @property string $start_timestamp [MySQL timestamp]
  * @property string $end_timestamp [MySQL timestamp]
  * @property int $id_author [int(11)]
  * @property bool $is_recurrent [tinyint(1)]
  * @property bool $is_all_day [tinyint(1)]
  * @property int $id [int(11)]
- * @property string $title [varchar(255)]
  * @property string $body [text]
  * @property string|false $endTime
  * @property string|false $startTime
@@ -65,6 +65,7 @@ class Activity extends ActiveRecord
             [['start_timestamp'], 'date', 'format' => 'php:d.m.Y', 'timestampAttribute' => 'start_timestamp'],
             [['end_timestamp'], 'date', 'format' => 'php:d.m.Y', 'timestampAttribute' => 'end_timestamp'],
             [['end_timestamp'], 'adjustDate'],
+            [['end_timestamp'], 'default', 'value' => $this->start_timestamp],
             [['id_author'], 'integer'],
             [['body'], 'string'],
             [['title'], 'string', 'max' => 255],
@@ -73,15 +74,11 @@ class Activity extends ActiveRecord
     }
 
     /**
-     * Функция-валидатор для установки даты окончания события в соответствие со следующими правилами.
-     * - При пустом поле времени завершения события устанавливается значение, равное дате начала события.
+     * Функция-валидатор для проверки следующего правила следующими правилами.
      * - Дата окончания не может быть меньше даты начала.
      */
     public function adjustDate($attribute)
     {
-        if ($this->end_timestamp === null) {
-            $this->end_timestamp = $this->start_timestamp;
-        }
         if ($this->start_timestamp > $this->end_timestamp) {
             $this->addError($attribute, 'Дата окончания события не может быть меньше даты начала события.');
         }

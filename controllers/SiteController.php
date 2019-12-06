@@ -127,19 +127,4 @@ class SiteController extends Controller
     {
         return $this->render('about');
     }
-
-    /**
-     * Показвает страницу с календарём.
-     * @return string
-     */
-    public function actionCalendar()
-    {
-        $activities = Activity::find()->all();
-        return $this->render('calendar', ['activities' => $activities]);
-    }
-
-    public function actionUsers() {
-        $users = User::find()->all();
-        return $this->render('users', ['users' => $users]);
-    }
 }

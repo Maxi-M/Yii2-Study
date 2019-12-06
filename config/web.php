@@ -13,6 +13,7 @@ $config = [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
+    'name' => 'Calendar',
     'components' => [
         'authManager' => [
             'class' => DbManager::class
