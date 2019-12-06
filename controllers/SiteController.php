@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Activity;
+use app\models\User;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -133,7 +134,12 @@ class SiteController extends Controller
      */
     public function actionCalendar()
     {
-        $activities = Yii::$app->dummy->activities;
+        $activities = Activity::find()->all();
         return $this->render('calendar', ['activities' => $activities]);
+    }
+
+    public function actionUsers() {
+        $users = User::find()->all();
+        return $this->render('users', ['users' => $users]);
     }
 }
