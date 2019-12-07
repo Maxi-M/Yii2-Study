@@ -19,8 +19,10 @@ echo DetailView::widget([
             'contentOptions' => ['class' => 'bg-red'],
             'captionOptions' => ['tooltip' => 'Tooltip'],
         ],
-        'start_timestamp:datetime',
-        'end_timestamp:datetime'
+        'start_timestamp:date',
+        'end_timestamp:date',
+        'is_recurrent:boolean',
+        'is_all_day:boolean'
     ],
 ]);
 
@@ -28,4 +30,4 @@ echo DetailView::widget([
 ?>
 
 <?= Html::a('Редактировать', Url::to(['activity/edit', 'id' => $model->id]), ['class'=>'btn btn-success']) ?>
-<?= Html::a('Назад в календарь', Url::to(['site/calendar']), ['class'=>'btn btn-warning']) ?>
+<?= Html::a('Назад к событиям', Url::to(['activity/index']), ['class'=>'btn btn-warning']) ?>

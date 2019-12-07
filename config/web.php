@@ -14,6 +14,7 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
     ],
     'name' => 'Calendar',
+    'language' => 'ru',
     'components' => [
         'authManager' => [
             'class' => DbManager::class
