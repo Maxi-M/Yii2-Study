@@ -24,6 +24,8 @@ use yii\db\ActiveRecord;
  * @property string|false $startTime
  * @property string|false $endDay
  * @property string|false $startDay
+ * @property int $created_at [timestamp]
+ * @property int $updated_at [timestamp]
  */
 class Activity extends ActiveRecord
 {
@@ -91,11 +93,27 @@ class Activity extends ActiveRecord
     public function behaviors(): array
     {
         return [
+            'TimestampBehaviour' => [
+                'class' => TimestampBehavior::className(),
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+            ],
             'TimestampTransform' => [
                 'class' => TimestampTransformBehavior::className(),
-                'attributes' => ['start_timestamp', 'end_timestamp'],
-            ]
+                'attributes' => ['start_timestamp', 'end_timestamp', 'created_at', 'updated_at'],
+            ],
         ];
+    }
+
+    /**
+     * Связь с таблицей пользователей
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser()
+    {
+        return $this->hasOne(User::className(), ['id' => 'id_author']);
     }
 
     /**

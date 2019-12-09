@@ -24,11 +24,12 @@ use yii\web\IdentityInterface;
  * @property string $surname [varchar(100)]
  * @property string $phone [varchar(50)]
  * @property string $path_to_photo [varchar(255)]
+ * @property \yii\db\ActiveQuery $activities
  * @property string $authKey
  */
 class User extends ActiveRecord implements IdentityInterface
 {
-    const SCENARIO_CREATE_USER = 'create_new_user';
+    public const SCENARIO_CREATE_USER = 'create_new_user';
 
     public $password;
     public $password2;
@@ -90,6 +91,15 @@ class User extends ActiveRecord implements IdentityInterface
                 'attributes' => ['created_at', 'updated_at'],
             ]
         ];
+    }
+
+    /**
+     * Связь с таблицей Activities
+     * @return yii\db\ActiveQuery
+     */
+    public function getActivities()
+    {
+        return $this->hasMany(Activity::className(), ['id_author' => 'id']);
     }
 
     /**
