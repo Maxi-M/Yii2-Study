@@ -7,6 +7,7 @@ namespace app\controllers;
 use app\models\User;
 use Yii;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
@@ -19,6 +20,24 @@ use yii\widgets\ActiveForm;
  */
 class UserController extends Controller
 {
+    /**
+     * Выводит список всех пользователей системы
+     */
+    public function actionIndex()
+    {
+        $usersProvider = new ActiveDataProvider([
+            'query' => User::find(),
+            'pagination' => [
+                'pageSize' => 15,
+            ],
+            'sort' => [
+                'defaultOrder' => [
+                    'created_at' => SORT_ASC,
+                ]
+            ]
+        ]);
+        return $this->render('index', ['provider' => $usersProvider]);
+    }
     public function actionShow($id): string
     {
         if ($model = User::findOne($id)) {
@@ -29,19 +48,21 @@ class UserController extends Controller
         die();
     }
 
-    public function actionCreate(): string
+    public function actionCreate()
     {
         $model = new User(['scenario' => User::SCENARIO_CREATE_USER]);
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->setPassword($model->password);
+            $model->generateAuthKey();
             $model->save();
-            return $this->render('show', ['model' => $model]);
+            return Yii::$app->getResponse()->redirect(['user/show', 'id' =>$model->id]);
         }
 
         return $this->render('form', ['model' => $model]);
     }
 
-    public function actionEdit($id): string
+    public function actionEdit($id)
     {
         if ($model = User::findOne($id)) {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
@@ -54,21 +75,6 @@ class UserController extends Controller
             die();
         }
         return $this->render('form', ['model' => $model]);
-    }
-
-    public function actionSubmit()
-    {
-        $model = new User();
-
-
-        if ($model->load(\Yii::$app->request->post()) && $model->validate()) {
-            $model->setPassword($model->password);
-            $model->generateAuthKey();
-            $model->save();
-            $model = User::findOne($model->id);
-            return $this->render('show', ['model' => $model]);
-        }
-        var_dump($model->getErrors());
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 
+use app\models\User;
 use yii\grid\ActionColumn;
-use app\models\Activity;
 use yii\grid\SerialColumn;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
@@ -11,7 +11,7 @@ use yii\web\View;
 
 /* @var $this View */
 /* @var $provider ActiveDataProvider */
-/* @var $data Activity */
+/* @var $data User */
 
 
 echo GridView::widget([
@@ -19,44 +19,46 @@ echo GridView::widget([
     'columns' => [
         ['class' => SerialColumn::class],
         [
-            'label' => 'Название события',
-            'attribute' => 'name',
+            'label' => 'Логин',
+            'attribute' => 'username',
             'value' => static function ($data) {
-                return $data->title;
+                return $data->username;
             }
         ],
         [
-            'label' => 'Дата начала',
-            'attribute' => 'activity_start_timestamp ',
+            'label' => 'E-mail',
+            'attribute' => 'email',
             'value' => static function ($data) {
-                return $data->startDay;
+                return $data->email;
             },
         ],
         [
-            'label' => 'Дата завершения',
-            'attribute' => 'activity_end_timestamp ',
+            'label' => 'Дата регистрации',
+            'attribute' => 'created_at',
             'value' => function ($data) {
-                return $data->endDay;
+                return $data->created_at;
             },
         ],
         [
-            'label' => 'Логин автора',
-            'attribute' => 'user.username',
+            'label' => 'ФИО',
+            'value' => function ($data) {
+                return $data->name. ' '.$data->surname;
+            },
         ],
         [
             'class' => ActionColumn::class,
             'urlCreator' => static function ($action, $model, $key, $index) {
                 if ($action === 'view') {
-                    return Url::to(['activity/show', 'id' => $model->id]);
+                    return Url::to(['user/show', 'id' => $model->id]);
                 }
                 if ($action === 'update') {
-                    return Url::to(['activity/edit', 'id' => $model->id]);
+                    return Url::to(['user/edit', 'id' => $model->id]);
                 }
                 if ($action === 'delete') {
-                    return Url::to(['activity/delete', 'id' => $model->id]);
+                    return Url::to(['user/delete', 'id' => $model->id]);
                 }
             }
         ]]
 ]);
 
-echo Html::a('Создать новое событие', Url::to(['activity/create']), ['class' => 'btn btn-success']);
+echo Html::a('Создать нового пользователя', Url::to(['user/create']), ['class' => 'btn btn-success']);

@@ -24,7 +24,8 @@ class ActivityController extends Controller
     public function actionIndex()
     {
         $activitiesProvider = new ActiveDataProvider([
-            'query' => Activity::find()->where(['id_author' => Yii::$app->user->id]),
+            'query' => Yii::$app->user->can('admin') ?
+                Activity::find() : Activity::find()->where(['id_author' => Yii::$app->user->id]),
             'pagination' => [
                 'pageSize' => 15,
             ],
@@ -45,7 +46,7 @@ class ActivityController extends Controller
     {
         if ($id = (int)Yii::$app->request->get('id')) {
             if ($model = Activity::findOne($id)) {
-                if ($model->id_author === Yii::$app->user->id) {
+                if (Yii::$app->user->can('view_activity', ['activity' => $model])) {
                     return $this->render('show', [
                         'model' => $model
                     ]);
@@ -74,7 +75,7 @@ class ActivityController extends Controller
     {
         if ($id = (int)Yii::$app->request->get('id')) {
             if ($model = Activity::findOne(['id' => $id])) {
-                if ($model->id_author === Yii::$app->user->id) {
+                if (Yii::$app->user->can('edit_activity', ['activity' => $model])) {
                     if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                         $model->save();
                         return Yii::$app->getResponse()->redirect(['activity/show', 'id' => $model->id]);
@@ -106,6 +107,12 @@ class ActivityController extends Controller
      */
     public function actionCreate()
     {
+        if (!Yii::$app->user->can('create_activity')) {
+            return $this->render('activity-error', [
+                'name' => self::ERROR_TITLE,
+                'message' => self::ERROR_ACCESS_DENIED
+            ]);
+        }
         $model = new Activity();
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
@@ -122,7 +129,7 @@ class ActivityController extends Controller
     public function actionDelete() {
         if ($id = (int)Yii::$app->request->get('id')) {
             if ($model = Activity::findOne(['id' => $id])) {
-                if ($model->id_author === Yii::$app->user->id) {
+                if (Yii::$app->user->can('delete_activity', ['activity' => $model])) {
                     try {
                         $model->delete();
                     } catch (\Throwable $e) {
