@@ -7,6 +7,7 @@ use app\models\Activity;
 use Yii;
 use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
+use yii\db\ActiveRecord;
 use yii\db\StaleObjectException;
 use yii\web\Controller;
 
@@ -74,7 +75,7 @@ class ActivityController extends Controller
     public function actionEdit()
     {
         if ($id = (int)Yii::$app->request->get('id')) {
-            if ($model = Activity::findOne(['id' => $id])) {
+            if ($model = Activity::findOne($id)) {
                 if (Yii::$app->user->can('edit_activity', ['activity' => $model])) {
                     if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                         $model->save();
@@ -117,7 +118,7 @@ class ActivityController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $model->save();
-            return $this->render('show', ['model' => $model]);
+            return Yii::$app->getResponse()->redirect(['/activity/show', 'id' => $model->id]);
         }
 
         return $this->render('form', ['model' => $model]);
@@ -126,7 +127,8 @@ class ActivityController extends Controller
     /**
      * Обрабатывает запрос на удаление события
      */
-    public function actionDelete() {
+    public function actionDelete()
+    {
         if ($id = (int)Yii::$app->request->get('id')) {
             if ($model = Activity::findOne(['id' => $id])) {
                 if (Yii::$app->user->can('delete_activity', ['activity' => $model])) {
@@ -154,5 +156,17 @@ class ActivityController extends Controller
             'name' => self::ERROR_TITLE,
             'message' => self::ERROR_PARAMETER_MISSING
         ]);
+    }
+
+    public function actionClearCache()
+    {
+        if (Yii::$app->cache->exists('activities_5')) {
+            Yii::$app->cache->delete('activities_5');
+            echo 'Yes';
+
+        } else {
+            echo 'no';
+        }
+        die();
     }
 }

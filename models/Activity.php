@@ -3,7 +3,8 @@
 
 namespace app\models;
 
-use app\components\TimestampTransformBehavior;
+use app\components\behaviors\CacheBehavior;
+use app\components\behaviors\TimestampTransformBehavior;
 use DateTime;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -104,6 +105,10 @@ class Activity extends ActiveRecord
                 'class' => TimestampTransformBehavior::className(),
                 'attributes' => ['start_timestamp', 'end_timestamp', 'created_at', 'updated_at'],
             ],
+            CacheBehavior::class => [
+                'class' => CacheBehavior::class,
+                'cacheKey' => self::tableName(),
+            ]
         ];
     }
 
@@ -114,6 +119,22 @@ class Activity extends ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'id_author']);
+    }
+
+    /**
+     * Возвращает данные из кеша, или из базы, если кеширования не было.
+     * @param mixed $condition
+     * @return mixed|ActiveRecord|null
+     */
+    public static function findOne($condition)
+    {
+        $cacheKey = self::tableName().'_'.$condition;
+        if (\Yii::$app->cache->exists($cacheKey) === false) {
+            $result = parent::findOne($condition);
+            \Yii::$app->cache->set($cacheKey, $result);
+            return $result;
+        }
+        return \Yii::$app->cache->get($cacheKey);
     }
 
     /**

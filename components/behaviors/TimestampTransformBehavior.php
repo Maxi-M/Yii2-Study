@@ -1,7 +1,7 @@
 <?php
 
 
-namespace app\components;
+namespace app\components\behaviors;
 
 
 use yii\base\Behavior;
