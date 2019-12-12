@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Activity;
 use app\models\User;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -126,5 +127,36 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+
+    /**
+     * Отображает страницу профиля пользователя
+     */
+    public function actionProfile() {
+        if (Yii::$app->user->isGuest) {
+            return Yii::$app->getResponse()->redirect('/site/login');
+        }
+        $user = User::findOne(Yii::$app->user->id);
+        $user->scenario = User::SCENARIO_EDIT_OWN_PROFILE;
+        if ($user->load(Yii::$app->request->post()) && $user->validate()) {
+            $user->save();
+        }
+
+        $activitiesProvider = new ActiveDataProvider([
+            'query' => Activity::find()->andWhere(['id_author' => Yii::$app->user->id]),
+            'pagination' => [
+                'pageSize' => 15,
+            ],
+            'sort' => [
+                'defaultOrder' => [
+                    'id' => SORT_DESC,
+                ]
+            ]
+        ]);
+
+        return $this->render('profile', [
+            'user' => $user,
+            'provider' => $activitiesProvider,
+        ]);
     }
 }
