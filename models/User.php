@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\behaviors\CacheBehavior;
 use app\components\behaviors\TimestampTransformBehavior;
 use yii;
 use yii\behaviors\TimestampBehavior;
@@ -30,6 +31,7 @@ use yii\web\IdentityInterface;
 class User extends ActiveRecord implements IdentityInterface
 {
     public const SCENARIO_CREATE_USER = 'create_new_user';
+    public const SCENARIO_EDIT_OWN_PROFILE = 'edit_own_profile';
 
     public $password;
     public $password2;
@@ -56,16 +58,18 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             ['id', 'integer'],
-            ['username', 'filter', 'filter' => 'trim'],
-            ['username', 'required'],
+            ['username', 'filter', 'filter' => 'trim', 'except' => self::SCENARIO_EDIT_OWN_PROFILE],
+            ['username', 'required', 'except' => self::SCENARIO_EDIT_OWN_PROFILE],
             ['username', 'unique', 'targetClass' => User::class, 'message' => 'This username has already been taken.', 'on' => self::SCENARIO_CREATE_USER],
-            ['username', 'string', 'min' => 2, 'max' => 255],
+            ['username', 'unique', 'targetClass' => User::class, 'message' => 'This username has already been taken.', 'filter' => ['!=', 'id', $this->id]],
+            ['username', 'string', 'min' => 2, 'max' => 255, 'except' => self::SCENARIO_EDIT_OWN_PROFILE],
 
             ['email', 'filter', 'filter' => 'trim'],
             ['email', 'required'],
             ['email', 'email'],
             ['email', 'string', 'max' => 255],
             ['email', 'unique', 'targetClass' => User::class, 'message' => 'This email address has already been taken.', 'on' => self::SCENARIO_CREATE_USER],
+            ['email', 'unique', 'targetClass' => User::class, 'message' => 'This email address has already been taken.', 'filter' => ['!=', 'id', $this->id]],
 
             [['name'], 'required'],
             [['name', 'surname'], 'string', 'min' => 2, 'max' => 255],
@@ -89,8 +93,28 @@ class User extends ActiveRecord implements IdentityInterface
             'TimestampTransform' => [
                 'class' => TimestampTransformBehavior::className(),
                 'attributes' => ['created_at', 'updated_at'],
+            ],
+            CacheBehavior::class => [
+                'class' => CacheBehavior::class,
+                'cacheKey' => self::tableName(),
             ]
         ];
+    }
+
+    /**
+     * Возвращает данные из кеша, или из базы, если кеширования не было.
+     * @param mixed $condition
+     * @return mixed|ActiveRecord|null
+     */
+    public static function findOne($condition)
+    {
+        $cacheKey = self::tableName().'_'.$condition;
+        if (\Yii::$app->cache->exists($cacheKey) === false) {
+            $result = parent::findOne($condition);
+            \Yii::$app->cache->set($cacheKey, $result);
+            return $result;
+        }
+        return \Yii::$app->cache->get($cacheKey);
     }
 
     /**
