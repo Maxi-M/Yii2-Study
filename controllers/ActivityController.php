@@ -9,6 +9,7 @@ use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
 use yii\db\StaleObjectException;
+use yii\helpers\Url;
 use yii\web\Controller;
 
 class ActivityController extends Controller
@@ -36,6 +37,7 @@ class ActivityController extends Controller
                 ]
             ]
         ]);
+        Url::remember();
         return $this->render('index', ['provider' => $activitiesProvider]);
     }
 
@@ -45,6 +47,7 @@ class ActivityController extends Controller
      */
     public function actionShow(): string
     {
+        Url::remember();
         if ($id = (int)Yii::$app->request->get('id')) {
             if ($model = Activity::findOne($id)) {
                 if (Yii::$app->user->can('view_activity', ['activity' => $model])) {
@@ -79,6 +82,9 @@ class ActivityController extends Controller
                 if (Yii::$app->user->can('edit_activity', ['activity' => $model])) {
                     if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                         $model->save();
+                        if ($urlFrom = Url::previous()) {
+                            return Yii::$app->getResponse()->redirect($urlFrom);
+                        }
                         return Yii::$app->getResponse()->redirect(['activity/show', 'id' => $model->id]);
                     }
                     return $this->render('form', [
@@ -140,6 +146,9 @@ class ActivityController extends Controller
                             'message' => self::ERROR_OPERATION_FAILED
                         ]);
                     }
+                    if ($urlFrom = Url::previous()) {
+                        return Yii::$app->getResponse()->redirect($urlFrom);
+                    }
                     return Yii::$app->getResponse()->redirect('/activity/index');
                 }
                 return $this->render('activity-error', [
@@ -156,17 +165,5 @@ class ActivityController extends Controller
             'name' => self::ERROR_TITLE,
             'message' => self::ERROR_PARAMETER_MISSING
         ]);
-    }
-
-    public function actionClearCache()
-    {
-        if (Yii::$app->cache->exists('activities_5')) {
-            Yii::$app->cache->delete('activities_5');
-            echo 'Yes';
-
-        } else {
-            echo 'no';
-        }
-        die();
     }
 }
