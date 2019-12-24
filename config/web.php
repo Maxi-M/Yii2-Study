@@ -20,6 +20,8 @@ $config = [
             'class' => DbManager::class
         ],
         'formatter' => [
+            'defaultTimeZone' => 'Europe/Moscow',
+            'timeZone' => 'Europe/Moscow',
             'dateFormat'     => 'php:d-m-Y',
             'datetimeFormat' => 'php:d-m-Y H:i:s',
             'timeFormat'     => 'php:H:i:s',
